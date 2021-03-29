@@ -3,6 +3,8 @@
 An implementation in C of the wu-manber algorithm described
 [here](https://www.cs.arizona.edu/sites/default/files/TR94-17.pdf).
 
+This library only works with patterns longer than 2.
+
 ## How to compile
 
 `$ make`
