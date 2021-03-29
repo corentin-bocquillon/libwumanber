@@ -73,7 +73,7 @@ void test_wumanber_search (void) {
     printf("match: \n");
     printf("  (pattern \"%s\")\n", match->pattern);
     printf("  (start \"%lu\")\n", match->start);
-    printf("\n");
+    printf(")\n");
   }
 
   wumanber_matches_free(matches);
