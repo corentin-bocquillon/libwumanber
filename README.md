@@ -38,27 +38,36 @@ And you can combine `DESTDIR` with `PREFIX`:
 #include <wumanber.h>
 
 int main(void) {
-  int npat = 2;
   int hbits = 4;
   int table_size = 32768;
 
-  char *patterns[npat] = {
+  struct wumamber_patterns pat;
+  pat.n_pat = 3;
+  uint8_t *patterns[pat.n_pat] = {
     "jour",
-    "hui",
+    "bon",
+    "llo",
   };
+  size_t len_patterns[pat.n_pat] = {
+    4,
+    3,
+    3
+  };
+  pat.patterns = patterns;
+  pat.len_patterns = len_patterns;
 
   const char *text = "hello, bonjour, hola... aujourd’hui";
 
   struct wumanber wm;
-  int ret = wumanber_init(&wm, patterns, npat, hbits, table_size);
+  int ret = wumanber_init(&wm, &pat, hbits, table_size);
   if (ret) {
     return 1;
   }
 
-  struct wumanber_matches *m = wumanber_scan(&wm, text);
+  struct wumanber_matches *m = wumanber_scan(&wm, text, strlen(text));
   for (int i = 0; i < m->size; ++i) {
     struct wumanber_match *match = m->matches + i;
-    printf("(match: \n");
+    printf("(match \n");
     printf("  (pattern \"%s\")\n", match->pattern);
     printf("  (start \"%lu\")\n", match->start);
     printf(")\n");

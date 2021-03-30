@@ -4,20 +4,20 @@
 
 #include "wumanber.h"
 
-int wumanber_init(struct wumanber *wm, char **patterns, size_t npat,
+int wumanber_init(struct wumanber *wm,  struct wumamber_patterns * patterns,
 		  unsigned short hbits, size_t table_size) {
   wm->m = 0;
   wm->table_size = table_size;
   wm->hbits = hbits;
 
-  int ret = wumanber_alloc_mem(wm, npat);
+  int ret = wumanber_alloc_mem(wm, patterns->n_pat);
   if (ret) {
     return ret;
   }
 
   size_t i;
-  for (i = 0; i < npat; ++i) {
-    size_t pat_len = strlen(patterns[i]);
+  for (i = 0; i < patterns->n_pat; ++i) {
+    size_t pat_len = patterns->len_patterns[i];
     if (pat_len < BLOCK_SIZE) {
       wumanber_free_mem(wm);
       return -1;
@@ -27,7 +27,12 @@ int wumanber_init(struct wumanber *wm, char **patterns, size_t npat,
       wm->m = pat_len;
     }
 
-    ret = vector_push_back(&wm->other_patterns, patterns + i);
+    ret = vector_push_back(&wm->other_patterns, patterns->patterns + i);
+    if (ret) {
+      wumanber_free_mem(wm);
+      return ret;
+    }
+    ret = vector_push_back(&wm->len_other_patterns, (void *) &pat_len);
     if (ret) {
       wumanber_free_mem(wm);
       return ret;
@@ -45,7 +50,7 @@ int wumanber_init(struct wumanber *wm, char **patterns, size_t npat,
   for (i = 0; i < wm->k; ++i) {
     for (j = wm->m; j >= BLOCK_SIZE; --j) {
       unsigned hash_value = get_wumanber_table_hash_from_text
-	(wm, *((char**) vector_get(&wm->other_patterns, i)), j - 1);
+	(wm, *((uint8_t**) vector_get(&wm->other_patterns, i)), j - 1);
 
       size_t shift_length = wm->m - j;
 
@@ -58,7 +63,7 @@ int wumanber_init(struct wumanber *wm, char **patterns, size_t npat,
 	pattern_hash_to_add.index = i;
 
 	/* calculate this prefix_hash to help us skip some patterns if there are collisions in hashPrefixTable_ */
-	pattern_hash_to_add.hash = get_prefix_hash_from_text(wm, *((char**) vector_get(&wm->other_patterns, i)), 0);
+	pattern_hash_to_add.hash = get_prefix_hash_from_text(wm, *((uint8_t**) vector_get(&wm->other_patterns, i)), 0);
 	ret = vector_push_back(&wm->hash_prefix_table[hash_value],
 			       &pattern_hash_to_add);
 	if (ret) {
@@ -72,8 +77,8 @@ int wumanber_init(struct wumanber *wm, char **patterns, size_t npat,
   return 0;
 }
 
-struct wumanber_matches* wumanber_scan(struct wumanber *wm, const char *text) {
-  size_t text_length = strlen(text);
+struct wumanber_matches* wumanber_scan(struct wumanber *wm, const uint8_t *text, size_t n_char) {
+  size_t text_length = n_char;
   if (text_length == 0) {
     return NULL;
   }
@@ -112,12 +117,12 @@ struct wumanber_matches* wumanber_scan(struct wumanber *wm, const char *text) {
       for (i = 0; i < npotential_match; ++i) {
 	struct pattern_hash *potential_match = vector_get(potential_pat, i);
 	if (prefix_hash == potential_match->hash) {
-	  char *pattern = *((char**) vector_get(&wm->other_patterns, potential_match->index));
+	  uint8_t *pattern = *((uint8_t**) vector_get(&wm->other_patterns, potential_match->index));
 	  size_t index_in_pattern = 0;
 	  size_t index_in_text = index - wm->m + 1;
 
 	  /* prefix hash matched so we try to match character by character */
-	  size_t pattern_length = strlen(pattern);
+	  size_t pattern_length = *(size_t*) vector_get(&wm->len_other_patterns, potential_match->index);
 	  while(index_in_pattern < pattern_length
 		&& index_in_text < text_length
 		&& pattern[index_in_pattern++] == text[index_in_text++]);
@@ -154,6 +159,10 @@ int wumanber_alloc_mem(struct wumanber *wm, size_t npat) {
     return ret;
   }
 
+  ret = vector_init(&wm->len_other_patterns, npat, sizeof (size_t));
+  if (ret) {
+    return ret;
+  }
   wm->shift_table = malloc(sizeof (size_t) * wm->table_size);
   if (!wm->shift_table) {
     vector_free(&wm->other_patterns);
@@ -200,7 +209,7 @@ void wumanber_free_mem(struct wumanber *wm) {
 }
 
 unsigned int
-get_wumanber_table_hash_from_text(struct wumanber *wm, const char *text, size_t cur_index) {
+get_wumanber_table_hash_from_text(struct wumanber *wm, const uint8_t *text, size_t cur_index) {
   unsigned int hash_value;
   hash_value = (size_t) text[cur_index];
   hash_value <<= wm->hbits;
@@ -211,7 +220,7 @@ get_wumanber_table_hash_from_text(struct wumanber *wm, const char *text, size_t 
   return hash_value;
 }
 
-unsigned int get_prefix_hash_from_text(struct wumanber *wm, const char *text,
+unsigned int get_prefix_hash_from_text(struct wumanber *wm, const uint8_t *text,
 				       size_t cur_index)  {
   unsigned int prefix_hash;
   prefix_hash = text[cur_index];

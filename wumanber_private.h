@@ -28,12 +28,12 @@ struct wumanber {
   size_t table_size;
 
   size_t *shift_table;
-  struct vector other_patterns, *hash_prefix_table;
+  struct vector other_patterns, len_other_patterns, *hash_prefix_table;
 };
 
 struct wumanber_match {
   /* A pointer to the matched pattern */
-  char *pattern;
+  uint8_t *pattern;
 
   /* Start of pattern in haystack */
   size_t start;
@@ -54,13 +54,13 @@ void wumanber_free_mem(struct wumanber *wm);
  *
  **/
 unsigned int
-get_wumanber_table_hash_from_text(struct wumanber *wm, const char *text,
+get_wumanber_table_hash_from_text(struct wumanber *wm, const uint8_t *text,
 				  size_t cur_index);
 
-unsigned int get_prefix_hash_from_text(struct wumanber *wm, const char *text,
+unsigned int get_prefix_hash_from_text(struct wumanber *wm, const uint8_t *text,
 				       size_t cur_index);
 
-int check_short_pattern(struct wumanber *wm, const char *text,
+int check_short_pattern(struct wumanber *wm, const uint8_t *text,
 			 size_t cur_index, struct vector *matches);
 
 #endif /* _WUMANBER_PRIVATE_H */

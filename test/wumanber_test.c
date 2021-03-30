@@ -12,11 +12,13 @@ void test_wumanber_search(void);
 #define NPAT 2
 /* #define NPAT 3 */
 
-char *patterns[NPAT] = {
+uint8_t *patterns[NPAT] = {
   "jour",
   "hui",
   /* "h", */
 };
+
+
 
 const char *text = "hello, bonjour, hola... aujourd’hui";
 
@@ -29,14 +31,24 @@ int main(void) {
 }
 
 void test_wumanber_init(void) {
-  char *patterns_[3] = {
+  uint8_t *patterns_[3] = {
     "jour",
     "bon",
     "llo"
   };
+  size_t len_patterns[3] = {
+    4,
+    3,
+    3
+  };
 
   struct wumanber wm;
-  int ret = wumanber_init(&wm, patterns_, 3, HBITS, TABLE_SIZE);
+  struct wumamber_patterns pat;
+
+  pat.n_pat = 3;
+  pat.patterns = patterns_;
+  pat.len_patterns = len_patterns;
+  int ret = wumanber_init(&wm, &pat, HBITS, TABLE_SIZE);
   if (ret) {
     fail("wumanber_init() failed\n");
   }
@@ -56,21 +68,36 @@ void test_wumanber_init(void) {
 }
 
 void test_wumanber_search (void) {
-  printf("test_wumanber_search()\n");
+  uint8_t *patterns_[3] = {
+    "jour",
+    "bon",
+    "llo"
+  };
+  size_t len_patterns[3] = {
+    4,
+    3,
+    3
+  };
+
   struct wumanber wm;
-  int ret = wumanber_init(&wm, patterns, NPAT, HBITS, TABLE_SIZE);
+  struct wumamber_patterns pat;
+
+  pat.n_pat = 3;
+  pat.patterns = patterns_;
+  pat.len_patterns = len_patterns;
+  int ret = wumanber_init(&wm, &pat, HBITS, TABLE_SIZE);
   if (ret) {
     fail("wumanber_init() failed\n");
   }
 
-  struct wumanber_matches *matches = wumanber_scan(&wm, text);
+  struct wumanber_matches *matches = wumanber_scan(&wm, text, strlen(text));
 
   printf("%lu matches\n", matches->size);
 
   size_t i;
   for (i = 0; i < matches->size; ++i) {
     struct wumanber_match *match = matches->matches + i;
-    printf("match: \n");
+    printf("(match \n");
     printf("  (pattern \"%s\")\n", match->pattern);
     printf("  (start \"%lu\")\n", match->start);
     printf(")\n");

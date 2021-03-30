@@ -1,7 +1,7 @@
 .POSIX:
 .SUFFIXES: .o .c
 
-CFLAGS  = -std=c89 -I.. -g -static
+CFLAGS  = -std=c99 -I.. -g -static
 LDFLAGS = -L.. -lwumanber
 
 SRC_TEST_WUMANBER = wumanber_test.c
