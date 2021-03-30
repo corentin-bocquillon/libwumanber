@@ -23,6 +23,6 @@ vector_test: ${OBJ_TEST_VECTOR}
 	$(CC) $(CFLAGS) -o $@ ${OBJ_TEST_VECTOR} $(LDFLAGS)
 
 clean:
-	rm -f *.o wumanber_test
+	rm -f *.o wumanber_test vector_test
 
 .PHONY: all check clean

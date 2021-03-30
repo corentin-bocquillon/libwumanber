@@ -24,6 +24,8 @@ struct wumamber_patterns {
 int wumanber_init(struct wumanber *wm,  struct wumamber_patterns * patterns,
 		  unsigned short hbits, size_t table_size);
 
+void wumanber_free(struct wumanber *wm);
+
 /**
  * Search for patterns in text
  **/

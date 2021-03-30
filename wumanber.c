@@ -19,7 +19,7 @@ int wumanber_init(struct wumanber *wm,  struct wumamber_patterns * patterns,
   for (i = 0; i < patterns->n_pat; ++i) {
     size_t pat_len = patterns->len_patterns[i];
     if (pat_len < BLOCK_SIZE) {
-      wumanber_free_mem(wm);
+      wumanber_free(wm);
       return -1;
     }
 
@@ -29,12 +29,12 @@ int wumanber_init(struct wumanber *wm,  struct wumamber_patterns * patterns,
 
     ret = vector_push_back(&wm->other_patterns, patterns->patterns + i);
     if (ret) {
-      wumanber_free_mem(wm);
+      wumanber_free(wm);
       return ret;
     }
     ret = vector_push_back(&wm->len_other_patterns, (void *) &pat_len);
     if (ret) {
-      wumanber_free_mem(wm);
+      wumanber_free(wm);
       return ret;
     }
   }
@@ -67,7 +67,7 @@ int wumanber_init(struct wumanber *wm,  struct wumamber_patterns * patterns,
 	ret = vector_push_back(&wm->hash_prefix_table[hash_value],
 			       &pattern_hash_to_add);
 	if (ret) {
-	  wumanber_free_mem(wm);
+	  wumanber_free(wm);
 	  return ret;
 	}
       }
@@ -196,7 +196,7 @@ int wumanber_alloc_mem(struct wumanber *wm, size_t npat) {
   return 0;
 }
 
-void wumanber_free_mem(struct wumanber *wm) {
+void wumanber_free(struct wumanber *wm) {
   vector_free(&wm->other_patterns);
   free(wm->shift_table);
 

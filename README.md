@@ -74,5 +74,6 @@ int main(void) {
   }
 
   wumanber_matches_free(m);
+  wumanber_free(&wm);
 }
 ```

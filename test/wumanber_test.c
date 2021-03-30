@@ -65,6 +65,8 @@ void test_wumanber_init(void) {
   } else if (strcmp(*((char**) vector_get(&wm.other_patterns, 2)), patterns_[2])) {
       fail("wumanber_init() failed\n");
   }
+
+  wumanber_free(&wm);
 }
 
 void test_wumanber_search (void) {
@@ -104,4 +106,5 @@ void test_wumanber_search (void) {
   }
 
   wumanber_matches_free(matches);
+  wumanber_free(&wm);
 }
